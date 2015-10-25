@@ -14,8 +14,10 @@ TEMPLATE = app
 LIBS += `pkg-config opencv --libs`
 
 SOURCES += main.cpp\
-        mainwindow.cpp
+        mainwindow.cpp \
+    videoprocessor.cpp
 
-HEADERS  += mainwindow.h
+HEADERS  += mainwindow.h \
+    videoprocessor.h
 
 FORMS    += mainwindow.ui

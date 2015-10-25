@@ -16,10 +16,23 @@
 using namespace cv;
 
 
-int main(int argc, char* argv[])
+int main(int argc, char *argv[])
+{
+    QApplication a(argc, argv);
+    MainWindow w;
+    w.show();
+
+
+
+    return a.exec();
+}
+
+
+
+int main1(int argc, char* argv[])
 {
 
-        const QString fn="example1.avi";
+        const QString fn="example2.avi";
         const QString fn1="test.avi";
 
         VideoCapture cap(fn.toStdString().c_str());
@@ -27,7 +40,7 @@ int main(int argc, char* argv[])
 
 
 
-        int erosion_size=5;
+        int erosion_size=2;
 
 
         Mat frame1,frame2;
@@ -43,9 +56,11 @@ int main(int argc, char* argv[])
 
         IplImage* image;
         Mat element = getStructuringElement( MORPH_RECT,Size( 2*erosion_size + 1, 2*erosion_size+1 ),Point( erosion_size, erosion_size ) );
+
         Mat threshold_output;
 
 
+        int step=20, i=step;
         do
         {
                    if(!cap.isOpened())
@@ -55,24 +70,40 @@ int main(int argc, char* argv[])
                          return -1;
                      }
 
-                    cap.read(frame1);
-                    cvtColor(frame1,grayImage1,CV_RGB2GRAY);
-                    for (int i=0; i<5; i++)
+
+
+                    if (i==step)
                     {
+                        cap.read(frame1);
 
-                        if (!cap.read(frame2))
-                        {
-                            cap.release();
-                            destroyAllWindows();
-                            return 0;
-                         }
+                        cvtColor(frame1,grayImage1,CV_RGB2GRAY);
+                        //blur(grayImage1,grayImage1,Size(21,21));
+                        blur(grayImage1,grayImage1,Size(50,50));
+
+                        i=0;
                     }
-                    cvtColor(frame2,grayImage2,CV_RGB2GRAY);
-                    blur(grayImage1,grayImage1,Size(21,21));
-                    absdiff(grayImage1,grayImage2,differnceImage);
-                    threshold(differnceImage,thresholdImage,25,255,CV_THRESH_BINARY);
+                    i++;
 
-                   erode(thresholdImage,thresholdImage,element,Point(-1,-1));
+                    if (!cap.read(frame2))
+                    {
+                        break;
+
+                     }
+
+
+                    cvtColor(frame2,grayImage2,CV_RGB2GRAY);
+                    blur(grayImage2,grayImage2,Size(21,21));
+
+                    absdiff(grayImage1,grayImage2,differnceImage);
+                    threshold(differnceImage,thresholdImage,32,255,CV_THRESH_BINARY);
+
+
+                    //erode(thresholdImage,thresholdImage,element,Point(-1,-1));
+
+                  //  cv::Mat kernel;
+                   // cv::getStructuringElement(cv::MORPH_RECT, cv::Size(20,20));
+                    //cv::morphologyEx(thresholdImage, thresholdImage, cv::MORPH_CLOSE, kernel, cv::Point(-1,-1));
+
                    //dilate(thresholdImage,thresholdImage,element,Point(-1,-1), 2);
 
                    //thresh = cv2.dilate(thresh, None, iterations=2)
@@ -80,7 +111,8 @@ int main(int argc, char* argv[])
                    vector<vector<Point> > contours;
                    vector<Vec4i> hierarchy;
 
-                   findContours(thresholdImage.clone(), contours, hierarchy, CV_RETR_TREE, CV_CHAIN_APPROX_SIMPLE, Point(0, 0) );
+                   //findContours(thresholdImage.clone(), contours, hierarchy, CV_RETR_TREE, CV_CHAIN_APPROX_SIMPLE, Point(0, 0) );
+                   findContours(thresholdImage.clone(), contours, hierarchy, CV_RETR_EXTERNAL, CV_CHAIN_APPROX_SIMPLE, Point(0, 0) );
 
 
                    vector<vector<Point> > contours_poly( contours.size() );
@@ -95,17 +127,13 @@ int main(int argc, char* argv[])
                        approxPolyDP( Mat(contours[i]), contours_poly[i], 3, true );
                        boundRect[i] = boundingRect( Mat(contours_poly[i]) );
 
-
-
                         //minEnclosingCircle( (Mat)contours_poly[i], center[i], radius[i] );
 
                         Scalar color = Scalar( 0,255,0);
 
-
-                        //get img size & count abt 5%
                         if (boundRect[i].area()>videoArea*.01)
 
-                        rectangle( frame1, boundRect[i].tl(), boundRect[i].br(), color, 2, 8, 0 );
+                        rectangle( frame2, boundRect[i].tl(), boundRect[i].br(), color, 2, 8, 0 );
 
 
                       }
@@ -129,12 +157,9 @@ int main(int argc, char* argv[])
 
 
 
-
-
-
                    imshow("Theshold",thresholdImage);
 
-                   imshow("Video",frame1);
+                   imshow("Video",frame2);
 
 
 
@@ -173,12 +198,3 @@ void draw_motion_comp(Mat& img, int x_coordinate, int y_coordinate, int width, i
 
 
 
-
-//int main(int argc, char *argv[])
-//{
-//    QApplication a(argc, argv);
-//    MainWindow w;
-//    w.show();
-
-//    return a.exec();
-//}
