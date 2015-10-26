@@ -18,24 +18,36 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->settingsBox->hide();
 
     loadSettings();
+
+    vdp = new VideoProcessor(this);
+    connect(vdp, SIGNAL(showFrame(QImage)), this, SLOT(showFrame(QImage)));
+    connect(vdp, SIGNAL(emitCurrentPosition(int)), this, SLOT(getCurrentPosition(int)));
+    connect(vdp, SIGNAL(videoEnded()), this, SLOT(getVideoStopped()));
+
+
+
+
 }
 
 MainWindow::~MainWindow()
 {
+    delete vdp;
     delete ui;
 }
 
 void MainWindow::on_actionOpen_triggered()
 {
+
+    if (vdp->isPlaying()) return;
     QString fileName = QFileDialog::getOpenFileName(this,
         tr("Open File"), "", tr("Video Files (*.avi)"));
 
-    if (!fileName.isEmpty())
-    {
-        ui->fileLine->setText(fileName);
-    }
+    if (fileName.isEmpty()) return;
 
+    ui->fileLine->setText(fileName);
     openFile(fileName);
+
+
 
 }
 
@@ -53,9 +65,13 @@ this->close();
 
 void MainWindow::openFile(QString filename)
 {
-//ui->label->setText(filename);
+
+
+    //ui->label->setText(filename);
 ui->videoSlider->setValue(0);
-if (!vdp.loadVideo(filename))
+
+
+if (!vdp->loadVideo(filename))
 {
  error(tr("Error in OpenCV while opening file"));
 }
@@ -122,7 +138,21 @@ void MainWindow::saveSettings()
 
 void MainWindow::on_playButton_clicked(bool checked)
 {
-    if (checked) play(); else pause();
+    if (vdp->isPlaying())
+    {
+        vdp->pause();
+        ui->playButton->setText(tr("Play"));
+        ui->playButton->setShortcut(QKeySequence(Qt::Key_P));
+
+    }
+    else
+    {
+        if (vdp->play())  ui->playButton->setText(tr("Pause"));
+        ui->playButton->setShortcut(QKeySequence(Qt::Key_P));
+
+    }
+
+
 
 }
 
@@ -133,8 +163,6 @@ void MainWindow::on_stopButton_clicked()
 
 void MainWindow::play ()
 {
-    if (1)
-        ui->playButton->setText(tr("Pause"));
 
 }
 
@@ -143,8 +171,7 @@ void MainWindow::pause()
 
 {
 
-    if (1)
-        ui->playButton->setText(tr("Play"));
+
 }
 
 
@@ -158,9 +185,16 @@ void MainWindow::on_actionHelp_triggered()
 
 }
 
-void MainWindow::showFrame (const QImage &img)
+void MainWindow::showFrame (QImage img)
 {
-    ui->label->setPixmap(QPixmap::fromImage(img));
+
+    if (!img.isNull())
+        {
+            ui->label->setAlignment(Qt::AlignCenter);
+            ui->label->setPixmap(QPixmap::fromImage(img).scaled(ui->label->size(),
+                                               Qt::KeepAspectRatio, Qt::FastTransformation));
+    }
+
 }
 
 
@@ -172,3 +206,14 @@ void MainWindow::error (QString msg)
     errorMessage.exec();
 }
 
+void MainWindow::getCurrentPosition(int pos)
+{
+ui->videoSlider->setValue(pos);
+}
+
+
+void MainWindow::getVideoStopped()
+{
+    ui->playButton->setText(tr("Play"));
+    ui->playButton->setShortcut(QKeySequence(Qt::Key_P));
+}

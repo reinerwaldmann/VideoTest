@@ -48,7 +48,12 @@ private slots:
 
     void on_actionHelp_triggered();
 
-    void showFrame (const QImage &img);
+    void showFrame (QImage img);
+
+    void getCurrentPosition(int pos);
+
+    void getVideoStopped();
+
 
 
 private:
@@ -63,7 +68,7 @@ private:
     void saveSettings();
 
     //video stuff
-    VideoProcessor vdp;
+    VideoProcessor  * vdp;
 
 
 
