@@ -56,6 +56,21 @@ private slots:
 
 
 
+    void on_speedSlider_valueChanged(int value);
+
+    void on_sizeSlider_valueChanged(int value);
+
+    void on_threshSlider_valueChanged(int value);
+
+    void on_videoSlider_valueChanged(int value);
+
+    void on_videoSlider_sliderReleased();
+
+    void on_videoSlider_sliderPressed();
+
+
+    void on_videoSlider_sliderMoved(int position);
+
 private:
     Ui::MainWindow *ui;
     void openFile(QString filename);

@@ -26,6 +26,9 @@
 
 #include <QDebug>
 
+#include <iostream>
+#include <fstream>
+
 class VideoProcessor: public QThread
 {
     Q_OBJECT
@@ -43,6 +46,15 @@ public:
     void seek0();
     void seek (unsigned int position);
 
+    //setting motion recognition parameters
+    void set_frameStep(int step);
+    void set_minSizeInPercents (int val);
+    void set_threshold(int val);
+
+    bool playFlagRemember;
+
+
+
 
 private:
     cv::VideoCapture cap;
@@ -53,8 +65,15 @@ private:
     QWaitCondition condition;
     int frameRate;
     double numberOfFrames;
+    cv::Mat frame1, grayImage1, frame;
 
-    cv::Mat frame;//debug
+    double getRealFrCount(QString fname);
+
+
+    //motion recognition parameters
+    unsigned int frameStep; //'base' frame taken every frameStep frames 2-100
+    unsigned int minSizeInPercents; //min size of motion area to be examined 2-90%
+    unsigned int threshold_val; //theshold on diff image
 
 
 

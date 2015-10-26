@@ -17,12 +17,17 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->setupUi(this);
     ui->settingsBox->hide();
 
-    loadSettings();
+
 
     vdp = new VideoProcessor(this);
     connect(vdp, SIGNAL(showFrame(QImage)), this, SLOT(showFrame(QImage)));
     connect(vdp, SIGNAL(emitCurrentPosition(int)), this, SLOT(getCurrentPosition(int)));
     connect(vdp, SIGNAL(videoEnded()), this, SLOT(getVideoStopped()));
+
+
+    loadSettings();
+
+
 
 
 
@@ -117,8 +122,15 @@ void MainWindow::loadSettings()
 
         QSettings settings(settingsFile, QSettings::NativeFormat);
         restoreGeometry(settings.value("geometry").toByteArray());
-        ui->speedSlider->setValue(settings.value("preferences/speed",50).toInt());
-        ui->threshSlider->setValue(settings.value("preferences/thresh",50).toInt());
+        ui->speedSlider->setValue(settings.value("preferences/speed",ui->speedSlider->maximum()/2).toInt());
+        ui->sizeSlider->setValue(settings.value("preferences/size",ui->sizeSlider->maximum()/2).toInt());
+        ui->threshSlider->setValue(settings.value("preferences/thresh",ui->threshSlider->maximum()/2).toInt());
+
+        on_speedSlider_valueChanged(ui->speedSlider->value());
+        on_sizeSlider_valueChanged(ui->sizeSlider->value());
+        on_threshSlider_valueChanged(ui->threshSlider->value());
+
+
 
 }
 
@@ -128,6 +140,8 @@ void MainWindow::saveSettings()
 
     settings.setValue("preferences/speed",ui->speedSlider->value()  );
     settings.setValue("preferences/thresh", ui->threshSlider->value());
+    settings.setValue("preferences/size", ui->sizeSlider->value());
+
 
     settings.setValue("geometry", saveGeometry());
 
@@ -216,4 +230,46 @@ void MainWindow::getVideoStopped()
 {
     ui->playButton->setText(tr("Play"));
     ui->playButton->setShortcut(QKeySequence(Qt::Key_P));
+}
+
+void MainWindow::on_speedSlider_valueChanged(int value)
+{
+    vdp->set_frameStep(ui->speedSlider->maximum()-value);
+    ui->lcdSpeed->display(value);
+}
+
+void MainWindow::on_sizeSlider_valueChanged(int value)
+{
+    vdp->set_minSizeInPercents(value);
+    ui->lcdSize->display(value);
+}
+
+void MainWindow::on_threshSlider_valueChanged(int value)
+{
+    vdp->set_threshold(value);
+    ui->lcdTresh->display(value);
+}
+
+void MainWindow::on_videoSlider_valueChanged(int value)
+{
+    //vdp->seek(value);
+}
+
+void MainWindow::on_videoSlider_sliderReleased()
+{
+vdp->seek(ui->videoSlider->value());
+
+if (vdp->playFlagRemember) vdp->play(); //if we played before movin'slider, then play
+}
+
+void MainWindow::on_videoSlider_sliderPressed()
+{
+    vdp->playFlagRemember = vdp->isPlaying();
+    vdp->pause();
+}
+
+
+void MainWindow::on_videoSlider_sliderMoved(int position)
+{
+
 }

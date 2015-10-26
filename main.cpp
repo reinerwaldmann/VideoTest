@@ -12,18 +12,35 @@
 #include <opencv2/highgui/highgui.hpp>
 #include <stdlib.h>
 #include <stdio.h>
+#include <fstream>
+#include <iostream>
 
 using namespace cv;
 
 
+int getFrameCount(const char *filename) {
+    // only works on AVIs
+    double frameCount;
+    char size[4];
+    std::ifstream fin(filename, std::ios::in|std::ios::binary);
+    if(!fin) {
+        std::cerr << "Could not open " << filename << endl;
+        exit(EXIT_FAILURE);
+    }
+    fin.seekg(0x30, std::ios::beg); // number of frames is stored at this location
+    fin.read(size, 4);
+    frameCount = size[0] | size[1]<<8 | size[2]<<16 | size[3]<<24;
+    fin.close();
+    return frameCount;
+}
+
+
 int main(int argc, char *argv[])
 {
+
     QApplication a(argc, argv);
     MainWindow w;
     w.show();
-
-
-
     return a.exec();
 }
 
