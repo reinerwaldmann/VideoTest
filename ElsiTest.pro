@@ -11,7 +11,11 @@ greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 TARGET = ElsiTest
 TEMPLATE = app
 
-LIBS += `pkg-config opencv --libs`
+
+linux-g++{
+    LIBS += `pkg-config opencv --libs`
+}
+
 
 SOURCES += main.cpp\
         mainwindow.cpp \

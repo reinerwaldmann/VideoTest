@@ -2,32 +2,16 @@
 #define VIDEOPROCESSOR_H
 
 
-#include <QObject>
-
 #include "opencv/cv.h"
-
 #include "opencv2/core/core.hpp"
-
-#include "opencv2/highgui/highgui_c.h"
-
-#include <opencv2/highgui/highgui.hpp>
-
 #include <QImage>
-
 #include <QRgb>
-
-#include <stdlib.h>
-#include <stdio.h>
-
 #include <QMutex>
 #include <QThread>
-#include <QImage>
 #include <QWaitCondition>
-
 #include <QDebug>
 
-#include <iostream>
-#include <fstream>
+
 
 class VideoProcessor: public QThread
 {
@@ -54,21 +38,23 @@ public:
     bool playFlagRemember;
 
 
-
-
 private:
     cv::VideoCapture cap;
-    QImage putImage(const cv::Mat& mat);
-    void mainCycle();
-    bool playFlag;
-    QMutex mutex;
-    QWaitCondition condition;
-    int frameRate;
-    double numberOfFrames;
     cv::Mat frame1, grayImage1, frame;
 
-    double getRealFrCount(QString fname);
+    QMutex mutex;
+    QWaitCondition condition;
 
+    bool playFlag;
+
+    QImage putImage(const cv::Mat& mat);
+    void mainCycle();
+
+    int frameRate;
+    double numberOfFrames;
+
+    double getRealFrCount(QString fname);
+    void getAnchorFrame();
 
     //motion recognition parameters
     unsigned int frameStep; //'base' frame taken every frameStep frames 2-100
@@ -76,20 +62,9 @@ private:
     unsigned int threshold_val; //theshold on diff image
 
 
-
-
 protected:
     void run();
     void msleep(unsigned long ms);
-
-
-private slots:
-    void play_slot();
-
-
-
-
-
 
 signals:
 

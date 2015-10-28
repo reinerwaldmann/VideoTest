@@ -20,14 +20,6 @@ public:
     explicit MainWindow(QWidget *parent = 0);
     ~MainWindow();
 
-    void play ();
-    void pause();
-    void stop() ;
-
-
-
-
-
 protected:
     void closeEvent(QCloseEvent *event);
 
@@ -71,11 +63,13 @@ private slots:
 
     void on_videoSlider_sliderMoved(int position);
 
+    void error (QString msg);
+
 private:
     Ui::MainWindow *ui;
     void openFile(QString filename);
     bool confirmClose();
-    void error (QString msg);
+
 
     //settings
     const QString settingsFile="settings.ini";
